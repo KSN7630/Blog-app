@@ -5,7 +5,6 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon api/index.js",
     "start": "node api/index.js"
   },
@@ -21,7 +20,9 @@
   },
   "homepage": "https://github.com/KSN7630/Blog-app#readme",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "mongoose": "^8.7.0",
     "nodemon": "^3.1.7"
   }
 }
