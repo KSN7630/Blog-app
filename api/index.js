@@ -1,8 +1,13 @@
 import express from 'express'
-const app=express();
+
 import  mongoose from 'mongoose';
 import 'dotenv/config'
 import userRoute from "./routes/user.route.js"
+import authRoute from "./routes/auth.route.js"
+
+
+const app=express();
+app.use(express.json());  // need to enalble so that json as the input for backend
 
 mongoose.connect(process.env.MONGO_URL).then(
     ()=>{
@@ -20,3 +25,4 @@ app.listen(3000,()=>{
 
 //use app.use as it is middleware
 app.use('/api/user',userRoute)
+app.use('/api/auth',authRoute)
