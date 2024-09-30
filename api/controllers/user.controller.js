@@ -2,6 +2,11 @@ import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 import { errorhandler } from './../utils/error.js';
 
+
+import jwt from 'jsonwebtoken';
+import 'dotenv/config'
+
+
 export const test_get=(req,res)=>{
     res.send("This is test request");
 }
@@ -17,8 +22,6 @@ export const signup_post=async(req,res,next)=>{
     //from bcryptjs  documentation -- take syntax
     const salt = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(password, salt);
-
-
     const user= new User({
         username,email,
         password:hashPassword
@@ -26,6 +29,37 @@ export const signup_post=async(req,res,next)=>{
     try{
         const savedUser=await user.save();
         res.status(200).json({message:"Sign-Up Successful"});
+    }catch(err){
+        next(err);   //  to pass error to errorhandler middleware in index.js
+    }
+    
+}
+
+
+export const signin_post=async(req,res,next)=>{
+    const {email,password}= req.body;
+    if(!email  || !password || password==='' || email===''){
+        next(errorhandler(400,"All fields are required"));
+    }
+    try{
+        const userFromDb=await User.findOne({email:req.body.email});
+        if(!userFromDb){
+            next(errorhandler(404,"Please Sign-Up using your email"));
+        }
+        const isSame=bcrypt.compareSync(password, userFromDb.password); 
+       
+        if(!isSame){
+            return next(errorhandler(400,"Invalid email or password"));
+        }
+
+        //we will use jsonwebtoken  to save user info in cookie of browser
+        const token = jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + (60 * 60),
+            id:userFromDb._id
+          }, process.env.JWT_SECRET);
+        const {password:pass,...rest}=userFromDb._doc;
+        res.status(200).cookie('access_token',token,{httpOnly:true}).json(rest) ;
+        
     }catch(err){
         next(err);   //  to pass error to errorhandler middleware in index.js
     }
