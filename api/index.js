@@ -26,3 +26,16 @@ app.listen(3000,()=>{
 //use app.use as it is middleware
 app.use('/api/user',userRoute)
 app.use('/api/auth',authRoute)
+
+
+//typical format of erro handler -- read it from express-mdn
+//4 para --> err,req,res,next
+app.use((err,req,res,next)=>{
+    const statusCode=err.statusCode || 500;
+    const message =err.message || "Internal server Error";
+    res.status(statusCode).json({
+        success:false,
+        statusCode,
+        message
+    });
+})
