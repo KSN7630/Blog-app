@@ -25,7 +25,7 @@ export const signup_post=async(req,res,next)=>{
     });
     try{
         const savedUser=await user.save();
-        res.status(200).json(savedUser);
+        res.status(200).json({message:"Sign-Up Successful"});
     }catch(err){
         next(err);   //  to pass error to errorhandler middleware in index.js
     }
