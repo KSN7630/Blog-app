@@ -3,13 +3,16 @@ import {Avatar, Button, Dropdown, DropdownHeader, Navbar, TextInput} from 'flowb
 import {Link ,useLocation} from "react-router-dom"
 import { AiOutlineSearch } from "react-icons/ai"
 import { FaMoon } from "react-icons/fa"
-import { useSelector } from 'react-redux';
+import {  useDispatch, useSelector } from 'react-redux';
+import {toggleTheme } from "../redux/theme/themeSlice.js"
 
 
 
 export default function Header() {
   const path=useLocation.pathname;
+  const dispatch=useDispatch();
   const {currentUser} =useSelector(state=>state.user);
+  
   return (
     <Navbar className='border-b-2'>
       <Link to="/" className='self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white' >
@@ -32,7 +35,7 @@ export default function Header() {
           md:order-2  means at medium size screen --> show it in 2md order
       */}
       <div className='flex gap-2 md:order-2'>  {/* hidden in smaller mobile size and larger screen more than mobile we want to show*/}
-        <Button className='w-12 h-10 hidden sm:inline' color='greay' pill>
+        <Button className='w-12 h-10 hidden sm:inline' color='greay' pill onClick={()=>dispatch(toggleTheme())}>
           <FaMoon/>
         </Button>
         {currentUser ? (
