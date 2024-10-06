@@ -142,20 +142,23 @@ export const update_user_put=async(req,res,next)=>{
     if(!req.body.username.match(/^[a-zA-Z0-9]+$/)){
       return next(errorhandler(400,'Username can only contain letters and numbers'));
     }
-    try{
-      const updatedUser=await User.findByIdAndUpdate(user_id,{
-        $set:{
-          username:req.body.username,
-          email:req.body.email,
-          password:req.body.password
-        }
-      },{new:true});
-      const {password,...rest}=updatedUser._doc;
-       res.status(200).json(
-       rest
-      );
-    }catch(err){
-      next(err);
-    }
+  }
+  try{
+    const updatedUser=await User.findByIdAndUpdate(user_id,{
+      $set:{
+        username:req.body.username,
+        email:req.body.email,
+        password:req.body.password,
+        profilePicture:req.body.profilePicture,
+        
+      }
+    },{new:true});
+    const {password,...rest}=updatedUser._doc;
+      res.status(200).json(
+      rest
+    );
+  }
+  catch(err){
+    next(err);
   }
 }
