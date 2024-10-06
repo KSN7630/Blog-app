@@ -4,11 +4,12 @@ import  mongoose from 'mongoose';
 import 'dotenv/config'
 import userRoute from "./routes/user.route.js"
 import authRoute from "./routes/auth.route.js"
+import cookieParser from 'cookie-parser';
 
 
 const app=express();
 app.use(express.json());  // need to enalble so that json as the input for backend
-
+app.use(cookieParser()); // to extract cookie from browser
 mongoose.connect(process.env.MONGO_URL).then(
     ()=>{
         console.log("Mongodb connected");
