@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
-import { Alert, Button, TextInput } from 'flowbite-react';
+import { Alert, Button, Modal, TextInput } from 'flowbite-react';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable} from "firebase/storage";
 import { app } from './../firebase.js';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { updateStart,updateSuccess,updateFailure } from '../redux/User/userSlice.js';
+import { updateStart,updateSuccess,updateFailure,deleteUserStart,deleteUserSuccess,deleteUserFailure } from '../redux/User/userSlice.js';
 import { useDispatch } from 'react-redux';
+import {HiOutlineExclamationCircle} from "react-icons/hi"
 
 export default function DashProfile() {
   const dispach=useDispatch();
-  const { currentUser } = useSelector(state => state.user);
+  const { currentUser,error } = useSelector(state => state.user);
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const filePickerRef=useRef();
@@ -21,6 +22,7 @@ export default function DashProfile() {
   const [updateUserError,setUpdateUserError]= useState(null);
 
   const [formData, setFormData]=useState({});
+  const [showModel,setShowModel]=useState(false);
   
  
 
@@ -41,8 +43,8 @@ export default function DashProfile() {
 
   const uploadImage=async ()=>{
     setImageFileUploadError(null);
-    setImageFileUploading(true)
-;    const storage=getStorage(app);
+    setImageFileUploading(true);    
+    const storage=getStorage(app);
     const filename=new Date()+imageFile.name;
     const storageRef=ref(storage,filename);
     const uploadTask = uploadBytesResumable(storageRef,imageFile);
@@ -72,6 +74,32 @@ export default function DashProfile() {
   const handleChange = (e)=>{
     setFormData({...formData , [e.target.id]:e.target.value});
   }
+
+  const handleClick=()=>{
+    setShowModel(true);
+  }
+
+  const handleDeleteUser=async()=>{
+    setShowModel(false);
+    try{
+      dispach(deleteUserStart());
+      const res=await fetch(`/api/user/delete/${currentUser._id}`,{
+        method:'Delete',
+      });
+      const data=await res.json();
+      if(!res.ok){
+        dispach(deleteUserFailure(data.message));
+      }
+      else{
+        dispach(deleteUserSuccess(data));
+      }
+
+    }catch(err){
+      dispach(deleteUserFailure(err.message));
+    }
+
+  }
+
   const handleSubmit=async (e)=>{
     e.preventDefault();
     setUpdateUserError(null);
@@ -146,16 +174,32 @@ export default function DashProfile() {
         <Button type='submit' gradientDuoTone={'purpleToBlue'}>Update</Button>
       </form>
       <div className='text-red-500 flex justify-between mt-5'>
-        <span className='cursor-pointer'>Delete Account</span>
+        <span onClick={handleClick} className='cursor-pointer'>Delete Account</span>
         <span className='cursor-pointer'>Sign-Out</span>
       </div>
       {updateUserSuccess && 
         <Alert color='success' className='mt-5'>{updateUserSuccess}</Alert>
       }
+      {error && 
+        <Alert color='failure' className='mt-5'>{error}</Alert>
+      }
       {
         updateUserError && 
         <Alert color='failure' className='mt-5'>{updateUserError}</Alert>
       }
+      <Modal show ={showModel} onClose={()=> setShowModel(false)} popup size='md'>
+        <Modal.Header />
+        <Modal.Body>
+          <div className="text-center">
+            <HiOutlineExclamationCircle className='h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto'/>
+            <h3 className='mb-5 text-lg text-gray-500 dark:text-grey-400'>Are you sure you want to delete your account?</h3>
+            <div className="flex justify-center gap-4">
+              <Button color='failure' onClick={handleDeleteUser}>Yes,I am sure</Button>
+              <Button color='success' onClick={()=>setShowModel(false)}>No, Cancel</Button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   )
 }
