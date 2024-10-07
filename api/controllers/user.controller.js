@@ -40,12 +40,12 @@ export const signup_post=async(req,res,next)=>{
 export const signin_post=async(req,res,next)=>{
     const {email,password}= req.body;
     if(!email  || !password || password==='' || email===''){
-        next(errorhandler(400,"All fields are required"));
+        return next(errorhandler(400,"All fields are required"));
     }
     try{
         const userFromDb=await User.findOne({email:req.body.email});
         if(!userFromDb){
-            next(errorhandler(404,"Please Sign-Up using your email"));
+          return next(errorhandler(404,"Please Sign-Up using your email"));
         }
         const isSame=bcrypt.compareSync(password, userFromDb.password); 
        
