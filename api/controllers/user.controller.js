@@ -56,7 +56,8 @@ export const signin_post=async(req,res,next)=>{
         //we will use jsonwebtoken  to save user info in cookie of browser
         const token = jwt.sign({
             exp: Math.floor(Date.now() / 1000) + (60 * 60),
-            id:userFromDb._id
+            id:userFromDb._id,
+            isAdmin:userFromDb.isAdmin,
           }, process.env.JWT_SECRET);
         const {password:pass,...rest}=userFromDb._doc;
         res.status(200).cookie('access_token',token,{httpOnly:true}).json(rest) ;
@@ -76,7 +77,7 @@ export const google_post =async (req,res,next)=>{
     const user = await User.findOne({ email });
     if (user) {
       const token = jwt.sign(
-        { id: user._id },
+        { id: user._id ,isAdmin:user.isAdmin},
         process.env.JWT_SECRET
       );
       const { password, ...rest } = user._doc;
@@ -101,7 +102,7 @@ export const google_post =async (req,res,next)=>{
       });
       await newUser.save();
       const token = jwt.sign(
-        { id: newUser._id},
+        { id: newUser._id,isAdmin:newUser.isAdmin},
         process.env.JWT_SECRET
       );
       const { password, ...rest } = newUser._doc;

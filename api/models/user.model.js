@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
     profilePicture:{
         type:String,
         default:"https://i1.rgstatic.net/ii/profile.image/1142222359674881-1649338440466_Q512/Ab-Cd-120.jpg"
+    },
+    isAdmin:{
+        type:Boolean,
+        default:false
     }
     
   },
