@@ -5,6 +5,7 @@ import 'dotenv/config'
 import userRoute from "./routes/user.route.js"
 import authRoute from "./routes/auth.route.js"
 import cookieParser from 'cookie-parser';
+import postRoute from "./routes/post.route.js";
 
 
 const app=express();
@@ -27,6 +28,7 @@ app.listen(3000,()=>{
 //use app.use as it is middleware
 app.use('/api/user',userRoute)
 app.use('/api/auth',authRoute)
+app.use('/api/post',postRoute)
 
 
 //typical format of erro handler -- read it from express-mdn
