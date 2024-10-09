@@ -37,7 +37,7 @@ export const get_post_get = async (req, res, next) => {
             ...(req.query.userId && { userId: req.query.userId }),
             ...(req.query.category && { category: req.query.category }),
             ...(req.query.slug && { slug: req.query.slug }),
-            ...(req.query.postId && { postId: req.query.postId }),
+            ...(req.query.postId && { _id: req.query.postId }),
             ...(req.query.searchTerm && {
                 $or: [
                     { title: { $regex: req.query.searchTerm, $options: 'i' } }, // Assuming you want to search the 'title'
@@ -73,6 +73,29 @@ export const delete_post_delete=async (req,res,next)=>{
     try{
         await Post.findByIdAndDelete(req.params.postId);
         res.status(200).json("Post deleted successfully");
+    }catch(err){
+        next(err);
+    }
+}
+
+
+export const update_post_put=async (req,res,next)=>{
+    if(!req.user.isAdmin || (req.user.id!=req.params.userId) ){
+        return next(errorhandler(403,"You are not allowed to update this post"));
+    }
+    try{
+        const updatePost=await Post.findByIdAndUpdate(req.params.postId,
+        {
+            $set:{
+                title:req.body.title,
+                content:req.body.content,
+                category:req.body.category,
+                image:req.body.image
+            }
+        },{new:true}
+        )
+        
+        res.status(200).json(updatePost);
     }catch(err){
         next(err);
     }
