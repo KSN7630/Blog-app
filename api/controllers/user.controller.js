@@ -225,3 +225,18 @@ export const get_users_get =async(req, res, next)=>{
     next(err);
   }
 }
+
+
+export const get_user_get =async(req,res,next)=>{
+  const userId=req.params.userId;
+  try{
+    const user=await User.findById(userId);
+    if(!user){
+      return next(errorhandler(404,"User not found"));
+    }
+    const {password,...rest}=user._doc;
+    res.status(200).json(rest);
+  }catch(err){
+    next(err);
+  }
+}

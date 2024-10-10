@@ -22,3 +22,15 @@ export const createComment_post = async (req, res,next) => {
         next(err);
     }
 };
+
+
+
+export const getPostComments_post=async(req,res,next)=>{
+
+    try{
+        const comment=await Comment.find({postId:req.params.postId}).sort({createdAt:-1}); //newwesst one at top
+        res.status(200).json(comment);
+    }catch(err){
+        next(err);
+    }
+}
