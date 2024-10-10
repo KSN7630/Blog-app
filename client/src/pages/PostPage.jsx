@@ -9,7 +9,7 @@ export default function PostPage() {
     const [loading,setLoading]=useState(false);
     const [error,setError]=useState(false);
     const [post,setPost]=useState(null);
-    console.log(post);
+
 
    
     useEffect(()=>{
