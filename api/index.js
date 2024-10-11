@@ -7,6 +7,7 @@ import authRoute from "./routes/auth.route.js"
 import cookieParser from 'cookie-parser';
 import postRoute from "./routes/post.route.js";
 import commentRoute from "./routes/comment.route.js"
+import "./utils/scheduler.js";
 
 
 const app=express();
@@ -32,6 +33,13 @@ app.use('/api/auth',authRoute)
 app.use('/api/post',postRoute)
 app.use('/api/comment',commentRoute)
 
+// 404 handler for undefined routes
+app.use((req, res, next) => {
+    res.status(404).json({
+        success: false,
+        message: 'Resource not found'
+    });
+});
 
 //typical format of erro handler -- read it from express-mdn
 //4 para --> err,req,res,next

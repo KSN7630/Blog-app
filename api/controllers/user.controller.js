@@ -1,11 +1,14 @@
 import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 import { errorhandler } from './../utils/error.js';
+import axios from 'axios';
+
 
 
 import jwt from 'jsonwebtoken';
 import 'dotenv/config'
 import bcryptjs from "bcryptjs";
+import { Leet_User } from "../models/LeetCode_User.js";
 
 
 export const test_get=(req,res)=>{
@@ -240,3 +243,143 @@ export const get_user_get =async(req,res,next)=>{
     next(err);
   }
 }
+
+
+
+export const addUser_put = async (req, res, next) => {
+    const leet_user = req.query.leetuser;
+    const app_user= req.query.appuser;
+
+    try {
+        const leetUser = await Leet_User.findOne({ leetUsername: leet_user });
+        if (leetUser) {
+            const updatedUser = await User.findByIdAndUpdate(
+                app_user,
+                { $addToSet: { friends: leetUser._id } }, // adds only if leetUserId is not already present
+                { new: true } // returns the updated document
+            );
+            return res.status(200).json({
+                message: "Username added successfully",
+                success: true,
+                data:updatedUser
+            });
+        } else {
+            const leetcodeResponse = await fetch(`https://leetcode-express-api.vercel.app/api/dataForSubmissionStats/${leet_user}`);
+            if (!leetcodeResponse.ok) {
+                return next({
+                    status: 500,
+                    message: "Failed to fetch data from LeetCode API"
+                });
+            }
+
+            const leetcodeUserData = await leetcodeResponse.json();
+
+            if (!leetcodeUserData || !leetcodeUserData.success) {
+                return next({
+                    status: 500,
+                    message: "Username May Not Exist...Please check again"
+                });
+            }
+
+            const newUser = new Leet_User({ leetUsername: leet_user });
+            await newUser.save();
+            const updatedUser = await App_User.findByIdAndUpdate(
+                app_user,
+                { $addToSet: { friends: newUser._id } }, // adds only if leetUserId is not already present
+                { new: true } // returns the updated document
+            );
+            return res.status(200).json({
+                message: "Username added successfully",
+                success: true,
+                data: updatedUser
+            });
+        }
+    } catch (err) {
+        return next({
+            status: 500,
+            message: "Internal Server Error"
+        });
+    }
+};
+
+
+
+
+// export const addUser_put = async (req, res, next) => {
+//   const leet_user = req.query.leetuser;
+//   const app_user = req.query.appuser;
+//   const maxRetries = 5; // Set a maximum number of retries
+//   const initialDelay = 1000; // 1 second initial delay before retry
+
+//   // Helper function for exponential backoff retry
+//   async function retryRequest(fn, retries = maxRetries, delay = initialDelay) {
+//       try {
+//           return await fn();
+//       } catch (err) {
+//           if (retries > 0) {
+//               console.warn(`Retrying... Attempts left: ${retries}. Error: ${err.message}`);
+//               // Wait for the delay (exponential backoff)
+//               await new Promise((resolve) => setTimeout(resolve, delay));
+//               return retryRequest(fn, retries - 1, delay * 2); // Retry with increased delay
+//           } else {
+//               throw err; // If max retries reached, throw the error
+//           }
+//       }
+//   }
+
+//   try {
+//       // Fetch user data and retry if there is an error
+//       const fetchLeetCodeUser = async () => {
+//           const leetcodeResponse =  await axios.get(`https://leetcode-express-api.vercel.app/api/dataForSubmissionStats/${leet_user}`);
+//           if (!leetcodeResponse.ok) {
+//               throw new Error("Failed to fetch data from LeetCode API");
+//           }
+//           const leetcodeUserData = await leetcodeResponse.json();
+
+//           if (!leetcodeUserData || !leetcodeUserData.success) {
+//               throw new Error("Username may not exist... Please check again.");
+//           }
+//           return leetcodeUserData;
+//       };
+
+//       // First, check if the user exists in your own database
+//       const leetUser = await Leet_User.findOne({ leetUsername: leet_user });
+//       if (leetUser) {
+//           // If user already exists, update app_user with leetUser's id
+//           const updatedUser = await User.findByIdAndUpdate(
+//               app_user,
+//               { $addToSet: { friends: leetUser._id } }, // Adds only if leetUserId is not already present
+//               { new: true } // Returns the updated document
+//           );
+//           return res.status(200).json({
+//               message: "Username added successfully",
+//               success: true,
+//               data: updatedUser
+//           });
+//       } else {
+//           // If user does not exist, fetch the user data from LeetCode with retry logic
+//           const leetcodeUserData = await retryRequest(fetchLeetCodeUser);
+
+//           // Create a new user in your database with the fetched data
+//           const newUser = new Leet_User({ leetUsername: leet_user });
+//           await newUser.save();
+
+//           // Update app_user to add the new LeetCode user as a friend
+//           const updatedUser = await App_User.findByIdAndUpdate(
+//               app_user,
+//               { $addToSet: { friends: newUser._id } }, // Adds only if leetUserId is not already present
+//               { new: true } // Returns the updated document
+//           );
+//           return res.status(200).json({
+//               message: "Username added successfully",
+//               success: true,
+//               data: updatedUser
+//           });
+//       }
+//   } catch (err) {
+//       return next({
+//           status: 500,
+//           message: `Internal Server Error: ${err.message}`
+//       });
+//   }
+// };
