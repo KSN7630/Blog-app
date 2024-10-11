@@ -27,6 +27,7 @@
 
 - **API:**
   - GraphQL for data retrieval from the LeetCode API
+  - [LeetCode Express API](https://leetcode-express-api.vercel.app/) for interacting with the LeetCode API and fetching user performance data. For more details, visit the [GitHub project](https://github.com/KSN7630/leetcode-express-api).
 
 ## Installation
 
